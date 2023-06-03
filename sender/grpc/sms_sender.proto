@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+message SMSMessage {
+  string mobile_number = 1;
+  string message = 2;
+}
+
+message MessageID {
+  string uuid = 1;
+}
+
+message MessageStatus {
+  string description = 1;
+  int32 code = 2;
+  string ipaddress = 3;
+}
+
+service SMSService {
+   // Service to send SMS and get status
+
+  // Send message
+  rpc SendMessage(SMSMessage) returns (MessageID) {};
+  // Get message status
+  rpc GetMessageStatus(MessageID) returns (MessageStatus) {};
+
+}
