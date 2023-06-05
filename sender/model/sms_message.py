@@ -1,9 +1,12 @@
+from typing import Optional
+
 from pydantic import Field
 from pydantic.types import UUID
-from redis_om import HashModel
+
+from sender.model.base_class import Base
 
 
-class SMSMessage(HashModel):
+class SMSMessage(Base):
     """SMS message model"""
     message_id: UUID = Field(..., description="message uuid", index=True)
     mobile: str = Field(
@@ -12,4 +15,4 @@ class SMSMessage(HashModel):
         index=True,
     )
     message_text: str = Field(..., description="short message")
-    is_sent: bool = Field(False, description="sending status")
+    is_sent: Optional[bool] = Field(False, description="sending status")

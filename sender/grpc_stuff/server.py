@@ -1,5 +1,7 @@
 import uuid
 from concurrent import futures
+
+from config import settings
 from sender.grpc_stuff import sms_sender_pb2_grpc, sms_sender_pb2
 import grpc
 
@@ -33,9 +35,9 @@ class SMSServiceServicer(sms_sender_pb2_grpc.SMSServiceServicer):
 
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=settings.GRPC_MAX_WORKERS))
     sms_sender_pb2_grpc.add_SMSServiceServicer_to_server(
         SMSServiceServicer(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port(f'[::]:{settings.GRPC_PORT}')
     server.start()
     server.wait_for_termination()

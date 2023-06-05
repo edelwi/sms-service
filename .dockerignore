@@ -1,0 +1,4 @@
+.github
+.ruff_cache
+venv
+.coverage

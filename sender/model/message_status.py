@@ -2,11 +2,12 @@ from typing import Optional
 
 from pydantic import Field
 from pydantic.types import UUID
-from redis_om import HashModel
 from datetime import datetime
 
+from sender.model.base_class import Base
 
-class MessageStatus(HashModel):
+
+class MessageStatus(Base):
     """SMS message status model"""
 
     message_id: UUID = Field(..., description="message uuid", index=True)
