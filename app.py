@@ -1,4 +1,9 @@
 import logging
+import os
+
+print(f"{os.getcwd()=}")
+
+print(f"{os.listdir()=}")
 
 from sender.grpc_stuff.server import serve
 

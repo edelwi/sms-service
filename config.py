@@ -22,9 +22,9 @@ class Settings(BaseSettings):
     # Megafon SMA API
     PVR_API_URL: AnyHttpUrl = "https://a2p-api.megalabs.ru/sms/v1/sms"
     PVR_API_SMS_FROM: str = "Compashka"
-    PVR_API_LOGIN: str = ""
-    PVR_API_PASSWORD: str = ""
-    PVR_CALLBACK_URL: str = ""
+    PVR_API_LOGIN: str = "login"
+    PVR_API_PASSWORD: str = "password"
+    PVR_CALLBACK_URL: str = "https://example.com/to_me"
     PVR_RATE_LIMIT_MPS: int = Field(5, gt=0)
 
     GRPC_MAX_WORKERS: int = 10

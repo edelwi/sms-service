@@ -13,18 +13,19 @@ class SomeSMSSender(Protocol):
         self,
         mobile: str,
         message: str,
+        idempotency_key: str,
     ) -> SendStatus:
         ...
 
 
 class SMSSenderCreator(ABC):
     @abstractmethod
-    def factory_method(self, **kwargs) -> SomeSMSSender:
+    def factory_method(self) -> SomeSMSSender:
         pass
 
-    def send_sms(self, mobile: str, message: str, **kwargs) -> SendStatus:
-        sender_obj = self.factory_method(**kwargs)
-        return sender_obj.send_sms(mobile=mobile, message=message)
+    def send_sms(self, mobile: str, message: str, idempotency_key: str) -> SendStatus:
+        sender_obj = self.factory_method()
+        return sender_obj.send_sms(mobile=mobile, message=message, idempotency_key=idempotency_key)
 
 
 class ProviderError(Exception):

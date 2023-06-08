@@ -3,7 +3,9 @@ from concurrent import futures
 
 from config import settings
 from sender.grpc_stuff import sms_sender_pb2_grpc, sms_sender_pb2
+from sender.queue.celery_app import send_sms_by_pk
 import grpc
+
 
 import sender.model.sms_message as sms_message
 
@@ -15,15 +17,16 @@ class SMSServiceServicer(sms_sender_pb2_grpc.SMSServiceServicer):
     def SendMessage(self, request, context):
         """Send message
         """
-        message_id = uuid.uuid4()
-        # message = sms_message.SMSMessage(
-        #     message_id=message_id,
-        #     mobile=request.mobile_number,
-        #     message_text=request.message
-        # )
-        # message.save()
+        message_id = str(uuid.uuid4())
+        message = sms_message.SMSMessage(
+            message_id=message_id,
+            mobile=request.mobile_number,
+            message_text=request.message
+        )
+        sms_message_obj = message.create(ttl_seconds=settings.REDIS_STORAGE_SMS_MESSAGE_TTL_SECONDS)
+        print(f"{sms_message_obj}")
         # TODO: Create celery task
-        # task_send_sms_message.delay(pk=message.pk)
+        send_sms_by_pk.delay(pk=message.pk)
         return sms_sender_pb2.MessageID(uuid=str(message_id))
 
     def GetMessageStatus(self, request, context):

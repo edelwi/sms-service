@@ -1,8 +1,10 @@
-import dataclasses
+from dataclasses import dataclass
 import logging
 import uuid
 from typing import Any
 from pydantic import BaseModel, Field
+
+from config import settings
 from sender.core import (
     SMSSenderCreator,
     SomeSMSSender,
@@ -12,7 +14,7 @@ from sender.core import (
 log = logging.getLogger()
 
 
-@dataclasses
+@dataclass
 class StubSendStatus:
     response_text: str
     status_code: int
@@ -34,8 +36,14 @@ class StubMessageFormat(BaseModel):
 
 
 class StubSMSSenderCreator(SMSSenderCreator):
-    def factory_method(self, **kwargs) -> SomeSMSSender:
-        return StubSMSSender(**kwargs)
+    def factory_method(self) -> SomeSMSSender:
+        return StubSMSSender(
+            api_url=settings.PVR_API_URL,
+            api_client_login=settings.PVR_API_LOGIN,
+            api_client_password=settings.PVR_API_PASSWORD,
+            from_label=settings.PVR_API_SMS_FROM,
+            callback_url=settings.PVR_CALLBACK_URL,
+        )
 
 
 class StubSMSSender:
@@ -53,11 +61,7 @@ class StubSMSSender:
         self._sms_from = from_label
         self._callback_url = callback_url
 
-    def send_sms(
-        self,
-        mobile: str,
-        message: str,
-    ) -> SendStatus:
+    def send_sms(self, mobile: str, message: str, idempotency_key: str) -> SendStatus:
 
         short_message = StubMessageFormat(
             mobile=mobile, message=message
@@ -67,7 +71,7 @@ class StubSMSSender:
             "to": int(short_message.mobile),
             "message": short_message.message,
             "callback_url": self._callback_url,
-            "msg_id": str(uuid.uuid4())[:16],
+            "msg_id": idempotency_key,
         }
         log.info(f"Stub send payload: {payload}")
 

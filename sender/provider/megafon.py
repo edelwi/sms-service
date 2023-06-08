@@ -1,10 +1,11 @@
-import dataclasses
+from dataclasses import dataclass
 import logging
 import string
-import uuid
 from typing import Any
 from pydantic import BaseModel, Field, validator
 import requests
+
+from config import settings
 from sender.core import (
     SMSSenderCreator,
     SomeSMSSender,
@@ -16,7 +17,7 @@ from sender.core import (
 log = logging.getLogger()
 
 
-@dataclasses
+@dataclass
 class MegafonSendStatus:
     response_text: str
     status_code: int
@@ -34,6 +35,7 @@ class MegafonMessageFormat(BaseModel):
     message: str = Field(
         ..., description="SMS message", example="Hi!", min_length=1, max_length=1000
     )
+    idempotency_key: str = Field(..., description="Idempotency key", max_length=16)
 
     @validator("mobile")
     def mobile_reformat(cls, value) -> str:
@@ -46,8 +48,14 @@ class MegafonMessageFormat(BaseModel):
 
 
 class MegafonSMSSenderCreator(SMSSenderCreator):
-    def factory_method(self, **kwargs) -> SomeSMSSender:
-        return MegafonSMSSender(**kwargs)
+    def factory_method(self) -> SomeSMSSender:
+        return MegafonSMSSender(
+            api_url=settings.PVR_API_URL,
+            api_client_login=settings.PVR_API_LOGIN,
+            api_client_password=settings.PVR_API_PASSWORD,
+            from_label=settings.PVR_API_SMS_FROM,
+            callback_url=settings.PVR_CALLBACK_URL,
+        )
 
 
 class MegafonSMSSender:
@@ -69,6 +77,7 @@ class MegafonSMSSender:
         self,
         mobile: str,
         message: str,
+        idempotency_key: str,
     ) -> SendStatus:
 
         short_message = MegafonMessageFormat(
@@ -79,7 +88,7 @@ class MegafonSMSSender:
             "to": int(short_message.mobile),
             "message": short_message.message,
             "callback_url": self._callback_url,
-            "msg_id": str(uuid.uuid4())[:16],
+            "msg_id": idempotency_key,
         }
         log.info(f"Send payload: {payload}")
         try:
