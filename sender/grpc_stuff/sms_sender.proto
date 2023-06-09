@@ -13,6 +13,7 @@ message MessageStatus {
   string description = 1;
   int32 code = 2;
   string ipaddress = 3;
+  string response_datetime = 4;
 }
 
 service SMSService {

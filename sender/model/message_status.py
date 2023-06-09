@@ -15,7 +15,7 @@ def utcnow_isoformat():
 class MessageStatus(Base):
     """SMS message status model"""
 
-    message_id: str = Field(..., description="message uuid", index=True)
+    message_id: str = Field(..., description="message uuid", index=True)  #
     description: str = Field(
         ...,
         description="status description",

@@ -11,19 +11,16 @@ class MessageID(_message.Message):
     def __init__(self, uuid: _Optional[str] = ...) -> None: ...
 
 class MessageStatus(_message.Message):
-    __slots__ = ["code", "description", "ipaddress"]
+    __slots__ = ["code", "description", "ipaddress", "response_datetime"]
     CODE_FIELD_NUMBER: _ClassVar[int]
     DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
     IPADDRESS_FIELD_NUMBER: _ClassVar[int]
+    RESPONSE_DATETIME_FIELD_NUMBER: _ClassVar[int]
     code: int
     description: str
     ipaddress: str
-    def __init__(
-        self,
-        description: _Optional[str] = ...,
-        code: _Optional[int] = ...,
-        ipaddress: _Optional[str] = ...,
-    ) -> None: ...
+    response_datetime: str
+    def __init__(self, description: _Optional[str] = ..., code: _Optional[int] = ..., ipaddress: _Optional[str] = ..., response_datetime: _Optional[str] = ...) -> None: ...
 
 class SMSMessage(_message.Message):
     __slots__ = ["message", "mobile_number"]
@@ -31,6 +28,4 @@ class SMSMessage(_message.Message):
     MOBILE_NUMBER_FIELD_NUMBER: _ClassVar[int]
     message: str
     mobile_number: str
-    def __init__(
-        self, mobile_number: _Optional[str] = ..., message: _Optional[str] = ...
-    ) -> None: ...
+    def __init__(self, mobile_number: _Optional[str] = ..., message: _Optional[str] = ...) -> None: ...
