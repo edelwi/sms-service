@@ -25,6 +25,11 @@ class SMSServiceStub(object):
                 request_serializer=sms__sender__pb2.MessageID.SerializeToString,
                 response_deserializer=sms__sender__pb2.MessageStatus.FromString,
                 )
+        self.GetDeliveryStatus = channel.unary_unary(
+                '/SMSService/GetDeliveryStatus',
+                request_serializer=sms__sender__pb2.MessageID.SerializeToString,
+                response_deserializer=sms__sender__pb2.DeliveryStatus.FromString,
+                )
 
 
 class SMSServiceServicer(object):
@@ -39,7 +44,14 @@ class SMSServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetMessageStatus(self, request, context):
-        """Get message status
+        """Get message status (sent or not)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetDeliveryStatus(self, request, context):
+        """Get delivery report
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -57,6 +69,11 @@ def add_SMSServiceServicer_to_server(servicer, server):
                     servicer.GetMessageStatus,
                     request_deserializer=sms__sender__pb2.MessageID.FromString,
                     response_serializer=sms__sender__pb2.MessageStatus.SerializeToString,
+            ),
+            'GetDeliveryStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetDeliveryStatus,
+                    request_deserializer=sms__sender__pb2.MessageID.FromString,
+                    response_serializer=sms__sender__pb2.DeliveryStatus.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -100,5 +117,22 @@ class SMSService(object):
         return grpc.experimental.unary_unary(request, target, '/SMSService/GetMessageStatus',
             sms__sender__pb2.MessageID.SerializeToString,
             sms__sender__pb2.MessageStatus.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetDeliveryStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/SMSService/GetDeliveryStatus',
+            sms__sender__pb2.MessageID.SerializeToString,
+            sms__sender__pb2.DeliveryStatus.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

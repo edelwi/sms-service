@@ -8,6 +8,7 @@ from redis_om.model.migrations.migrator import IndexMigration, MigrationAction
 
 from config import settings
 from sender.grpc_stuff import sms_sender_pb2_grpc, sms_sender_pb2
+from sender.model.delivery_status import DeliveryStatus
 from sender.model.message_status import MessageStatus
 from sender.model.redis_connector import get_redis_db
 from sender.queue.celery_app import send_sms_by_pk
@@ -78,6 +79,38 @@ class SMSServiceServicer(sms_sender_pb2_grpc.SMSServiceServicer):
                 description="Dose not found.",
                 code=-1,
                 ipaddress="0.0.0.0",
+                response_datetime=datetime.datetime.utcnow().isoformat(),
+            )
+        else:
+            return statuses[-1]
+
+    def GetDeliveryStatus(self, request, context):
+        """Get message status"""
+        message_id = str(request.uuid)
+        redis = get_redis_db()
+
+        DeliveryStatus.Meta.database = redis
+
+        statuses = []
+        for item in DeliveryStatus.all_pks():
+            current_item = DeliveryStatus.get(item)
+            if current_item.message_id == message_id:
+                statuses.append(
+                    sms_sender_pb2.DeliveryStatus(
+                        message_id=message_id,
+                        receipted_message_id=current_item.receipted_message_id,
+                        status=current_item.status,
+                        short_message=current_item.short_message,
+                        response_datetime=current_item.response_datetime,
+                    )
+                )
+        sorted(statuses, key=lambda x: x.response_datetime)
+        if not statuses:
+            return sms_sender_pb2.DeliveryStatus(
+                message_id=message_id,
+                receipted_message_id="",
+                status="Delivery notification does not found.",
+                short_message="",
                 response_datetime=datetime.datetime.utcnow().isoformat(),
             )
         else:

@@ -16,12 +16,21 @@ message MessageStatus {
   string response_datetime = 4;
 }
 
+message DeliveryStatus {
+  string message_id = 1;
+  string receipted_message_id = 2;
+  string status = 3;
+  string short_message = 4;
+  string response_datetime = 5;
+}
+
 service SMSService {
    // Service to send SMS and get status
 
   // Send message
   rpc SendMessage(SMSMessage) returns (MessageID) {};
-  // Get message status
+  // Get message status (sent or not)
   rpc GetMessageStatus(MessageID) returns (MessageStatus) {};
-
+  // Get delivery report
+  rpc GetDeliveryStatus(MessageID) returns (DeliveryStatus) {};
 }

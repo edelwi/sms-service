@@ -3,35 +3,18 @@ version: '3.8'
 services:
 
   sms: # service name
-
-#build the image for the web service from the dockerfile in parent directory.
     build: .
-
-# command directive passes the parameters to the service and they will be executed by the service.
-#  In this example, these are django commands which will be executed in the container where django lives.
     command: python app.py
-
 # map data and files from parent directory in host to microservice directory in docker container
     volumes:
       - .:/sms_ms
-
     ports:
       - 50051:50051
-
-# file where env variables are stored. Used as best practice so as not to expose secret keys
     env_file:
       - .env_demo # name of the env file
-
-# name of the image
     image: sms_ms
-
-# expose the port to other services defined here so that they can access this service via the exposed port.
-#    expose:
-#      - "${GRPC_PORT}" # retrieved from the .env file
-
     restart: "on-failure"
 
-# cannot start if db service is not up and running
     depends_on:
       - redis
       - rabbitmq
@@ -58,10 +41,7 @@ services:
 
 
   worker:
-    # celery
     build: .
-#      context:
-#        ./sender
     hostname: worker
     entrypoint: celery
     command: -A sender.queue.celery_app:celery_app worker --loglevel=info
@@ -69,10 +49,6 @@ services:
       - ./sender:/sms_ms
     env_file:
       - .env_demo
-    environment:
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
-      - CELERY_BACKEND_URL=redis://redis:6379/1
-      - REDIS_STORAGE_URL=redis://redis:6379/0
     links:
       - redis
     depends_on:
@@ -80,6 +56,21 @@ services:
       - redis
     restart: "on-failure"
 
+  delivery_api:
+    build: .
+    hostname: fastapi
+    command: uvicorn sender.callback.cbapp:app --host 127.0.0.1 --port 8000
+    ports:
+      - 8000:8000
+    volumes:
+      - ./sender:/sms_ms
+    env_file:
+      - .env_demo
+    links:
+      - redis
+    depends_on:
+      - redis
+    restart: "on-failure"
 
 volumes:
   redis_data:

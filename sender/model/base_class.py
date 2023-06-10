@@ -1,8 +1,13 @@
+from datetime import datetime
 from typing import Self, Union, Dict
 
 from redis_om import HashModel
 
 from sender.model.redis_connector import get_redis_db
+
+
+def utcnow_isoformat():
+    return datetime.utcnow().isoformat()
 
 
 class Base(HashModel):

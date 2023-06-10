@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10sms_sender.proto\"4\n\nSMSMessage\x12\x15\n\rmobile_number\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x19\n\tMessageID\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"`\n\rMessageStatus\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x11\n\tipaddress\x18\x03 \x01(\t\x12\x19\n\x11response_datetime\x18\x04 \x01(\t2h\n\nSMSService\x12(\n\x0bSendMessage\x12\x0b.SMSMessage\x1a\n.MessageID\"\x00\x12\x30\n\x10GetMessageStatus\x12\n.MessageID\x1a\x0e.MessageStatus\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10sms_sender.proto\"4\n\nSMSMessage\x12\x15\n\rmobile_number\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x19\n\tMessageID\x12\x0c\n\x04uuid\x18\x01 \x01(\t\"`\n\rMessageStatus\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\x05\x12\x11\n\tipaddress\x18\x03 \x01(\t\x12\x19\n\x11response_datetime\x18\x04 \x01(\t\"\x84\x01\n\x0e\x44\x65liveryStatus\x12\x12\n\nmessage_id\x18\x01 \x01(\t\x12\x1c\n\x14receipted_message_id\x18\x02 \x01(\t\x12\x0e\n\x06status\x18\x03 \x01(\t\x12\x15\n\rshort_message\x18\x04 \x01(\t\x12\x19\n\x11response_datetime\x18\x05 \x01(\t2\x9c\x01\n\nSMSService\x12(\n\x0bSendMessage\x12\x0b.SMSMessage\x1a\n.MessageID\"\x00\x12\x30\n\x10GetMessageStatus\x12\n.MessageID\x1a\x0e.MessageStatus\"\x00\x12\x32\n\x11GetDeliveryStatus\x12\n.MessageID\x1a\x0f.DeliveryStatus\"\x00\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'sms_sender_pb2', globals())
@@ -26,6 +26,8 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _MESSAGEID._serialized_end=99
   _MESSAGESTATUS._serialized_start=101
   _MESSAGESTATUS._serialized_end=197
-  _SMSSERVICE._serialized_start=199
-  _SMSSERVICE._serialized_end=303
+  _DELIVERYSTATUS._serialized_start=200
+  _DELIVERYSTATUS._serialized_end=332
+  _SMSSERVICE._serialized_start=335
+  _SMSSERVICE._serialized_end=491
 # @@protoc_insertion_point(module_scope)

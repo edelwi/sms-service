@@ -57,7 +57,7 @@ def send_sms_by_pk(pk: str) -> None:
     if result.status_code == 200:
         message.is_sent = 1
         message.save()
-        print(f"SMS {type(smser)=}")
+        # print(f"SMS {type(smser)=}")
         if isinstance(smser, StubSMSSenderCreator):
             # run task that receive fake callback
             responses = (fake_response_ok, fake_response_fail)
