@@ -9,7 +9,7 @@ from sender.provider.schema import megafon
 
 app = FastAPI(
     title="sms-sender delivery api",
-    openapi_url="/openapi.json",
+    openapi_url="/schema/openapi.json",
     version="0.0.1",
 )
 

@@ -2,14 +2,13 @@ version: '3.8'
 
 services:
 
-  sms: # service name
+  core: # service name
     build: .
     command: python app.py
-# map data and files from parent directory in host to microservice directory in docker container
     volumes:
       - .:/sms_ms
     ports:
-      - 50051:50051
+      - "50051:50051"
     env_file:
       - .env_demo # name of the env file
     image: sms_ms
@@ -40,7 +39,7 @@ services:
     restart: "on-failure"
 
 
-  worker:
+  celery:
     build: .
     hostname: worker
     entrypoint: celery
@@ -58,12 +57,15 @@ services:
 
   delivery_api:
     build: .
-    hostname: fastapi
-    command: uvicorn sender.callback.cbapp:app --host 127.0.0.1 --port 8000
+#    hostname: fastapi
+    image: sms_delivery_api
+    command: uvicorn sender.callback.cbapp:app --host 0.0.0.0 --port 8000
     ports:
-      - 8000:8000
+      - "8000:8000"
+    expose:
+      - 8000
     volumes:
-      - ./sender:/sms_ms
+      - .:/sms_delivery_api
     env_file:
       - .env_demo
     links:
@@ -71,6 +73,7 @@ services:
     depends_on:
       - redis
     restart: "on-failure"
+
 
 volumes:
   redis_data:

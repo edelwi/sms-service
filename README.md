@@ -1,14 +1,17 @@
 # sms-sender service
+[MIT License](LICENSE.txt)
 
 Microservice for sending SMS messages.
 
-Components
+The project pursues educational and research goals. It can be the base of a real microservice. But I doubt that radis-om is ready for use in production at the moment.
+
+# System Components
 ```mermaid
 flowchart TB
-    c(gRPC controller)
+    c(Core - gRPC controller)
     r0[(Redis DB 0 storage)]
     r1[(Redis DB 1 celery backend)]
-    rq[\Message broker/]
+    rq[\RabbitMQ/]
     cw[[Celery worker]]
     d[[Delivery API]]
     c-->r0
@@ -21,8 +24,25 @@ flowchart TB
     
 ```
 
+# Installation
+```shell
+git clone https://github.com/edelwi/sms-service.git
+cd sms-service
+# run service
+docker-compose up --build  # build and run containers (console attached mode, add -d to detach)
+```
 
-Send SMS schema
+# Run client
+```shell
+python3  -m venv venv
+source ./venv/bin/activate  # activate virtual environment (on linux) on Windows run venv\Scripts\activate.bat
+pip install grpcio==1.54.2 requests==2.31.0
+python sms_client.py
+```
+
+# Interaction schemes
+
+## SMS sending scheme
 ```mermaid
 sequenceDiagram
     participant sms-sender client
@@ -51,7 +71,7 @@ sequenceDiagram
     Core->>-sms-sender client: SMS ID 1 sending status.
 ```
 
-Delivery SMS schema
+## SMS Delivery schema
 ```mermaid
 sequenceDiagram
     participant sms-sender client

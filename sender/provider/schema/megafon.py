@@ -27,10 +27,8 @@ class DeliveryStatus(str, Enum):
 
 
 class DeliveryMessage(BaseModel):
-    msg_id: str = Field(..., description="Message ID", regex="A-Za-z0-9_:-")
-    receipted_message_id: str = (
-        Field(..., description="Message id received from SMSC"),
-    )
+    msg_id: str = Field(..., description="Message ID", regex="[A-Za-z0-9_:-]+")
+    receipted_message_id: str = Field(..., description="Message id received from SMSC")
     status: DeliveryStatus = Field(..., description="Delivery status")
     short_message: Optional[str] = Field(
         "",

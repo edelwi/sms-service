@@ -1,4 +1,5 @@
-import logging
+import json
+import random
 from typing import Tuple
 
 import grpc
@@ -35,12 +36,14 @@ def send_delivery_status(message_id: sms_sender_pb2.MessageID):
     print(f"send_delivery_status: {message_id=}")
     delivery_report = {
         "msg_id": message_id.uuid,
-        "receipted_message_id": 42345,
-        "status": "delivered",
+        "receipted_message_id": random.randint(10000, 300000),
+        "status": random.choice(("delivered", "delivery_failed")),
         "short_message": "id:917615ac sub:001 dlvrd:001 submit date:1701241159 "
                          "done date:1701241159 stat:DELIVRD err:000",
     }
-    requests.post("http://localhost:8000/callback", json=delivery_report)
+    r=requests.post("http://localhost:8000/callback", data=json.dumps(delivery_report))
+    print(f"API response {r.status_code}")
+    print(f"TEXT ==> {r.text}")
 
 
 def get_delivery_status(stub, message_id: sms_sender_pb2.MessageID):
@@ -71,5 +74,4 @@ def run():
 
 
 if __name__ == "__main__":
-    logging.basicConfig()
     run()
