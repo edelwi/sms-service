@@ -1,5 +1,7 @@
+import asyncio
 import logging
 import random
+from inspect import isawaitable
 
 from celery import Celery
 
@@ -10,15 +12,34 @@ from sender.model.redis_connector import get_redis_db
 from sender.model.sms_message import SMSMessage
 from sender.provider.stub import StubSMSSenderCreator, StubSMSSender
 
-celery_app = Celery(
-    "tasks",
-    broker=settings.CELERY_BROKER_URL,
-    backend=settings.CELERY_BACKEND_URL,
-)
-celery_app.conf.broker_transport_options = {"visibility_timeout": 3600}
-celery_app.conf.task_serializer = "pickle"
-celery_app.conf.timezone = settings.CELERY_TZ
-celery_app.conf.accept_content = ["json", "pickle"]
+
+def init_celery():
+    celery = Celery(
+        "tasks",
+        broker=settings.CELERY_BROKER_URL,
+        backend=settings.CELERY_BACKEND_URL,
+    )
+
+    celery.conf.broker_transport_options = {"visibility_timeout": 3600}
+    celery.conf.task_serializer = "pickle"
+    celery.conf.timezone = settings.CELERY_TZ
+    celery.conf.accept_content = ["json", "pickle"]
+
+    class ContextTask(celery.Task):
+        async def _run(self, *args, **kwargs):
+            result = super().__call__(*args, **kwargs)
+            if isawaitable(result):
+                await result
+
+        def __call__(self, *args, **kwargs):
+            asyncio.run(self._run(*args, **kwargs))
+
+    celery.Task = ContextTask
+
+    return celery
+
+
+celery_app = init_celery()
 
 # celery_app.conf.task_routes = {"app.worker.test_celery": "main-queue"}
 log = logging.getLogger(__name__)
@@ -31,11 +52,11 @@ class WrongStateRepeatTask(Exception):
 
 
 @celery_app.task(rate_limit=settings.PVR_RATE_LIMIT_MPS, ignore_result=True)
-def send_sms(
+async def send_sms(
     mobile: str,
     message: str,
 ) -> None:
-    smser.send_sms(mobile=mobile, message=message)
+    await smser.send_sms(mobile=mobile, message=message)
 
 
 @celery_app.task(
@@ -46,24 +67,24 @@ def send_sms(
     retry_jitter=True,
     ignore_result=True,
 )
-def send_sms_by_pk(pk: str) -> None:
+async def send_sms_by_pk(pk: str) -> None:
     SMSMessage.Meta.database = get_redis_db()
-    message = SMSMessage.get(pk=pk)
-    result = smser.send_sms(
+    message = await SMSMessage.get(pk=pk)
+    result = await smser.send_sms(
         mobile=message.mobile,
         message=message.message_text,
         idempotency_key=message.message_id,
     )
     if result.status_code == 200:
         message.is_sent = 1
-        message.save()
+        await message.save()
         # print(f"SMS {type(smser)=}")
         if isinstance(smser, StubSMSSenderCreator):
             # run task that receive fake callback
             responses = (fake_response_ok, fake_response_fail)
             response_method = random.choice(responses)
             fake_response = response_method(message_id=message.message_id)
-            fake_response.create(
+            await fake_response.create(
                 ttl_seconds=settings.REDIS_STORAGE_MESSAGE_STATUS_TTL_SECONDS
             )
         return

@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Self, Union, Dict
 
-from redis_om import HashModel
+# from redis_om import HashModel
+from aredis_om import HashModel
 
 from sender.model.redis_connector import get_redis_db
 
@@ -15,11 +16,11 @@ class Base(HashModel):
 
     # version with CRUD is not working
 
-    def create(self, ttl_seconds=0) -> Self:
+    async def create(self, ttl_seconds=0) -> Self:
         self.connect()
-        self.save()
+        await self.save()
         if ttl_seconds:
-            self.set_ttl(pk=self.pk, ttl_seconds=ttl_seconds)
+            await self.set_ttl(pk=self.pk, ttl_seconds=ttl_seconds)
         return self
 
     # def update(
@@ -38,10 +39,10 @@ class Base(HashModel):
     #     self.save()
     #     return self
 
-    def set_ttl(self, pk: str, ttl_seconds=0):
+    async def set_ttl(self, pk: str, ttl_seconds=0):
         if ttl_seconds > 0:
-            model_to_expire = self.get(pk)
-            self.db().expire(model_to_expire.key(), ttl_seconds)
+            model_to_expire = await self.get(pk)
+            await self.db().expire(model_to_expire.key(), ttl_seconds)
 
     def connect(self):
         self.Meta.database = get_redis_db()

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import logging
-import uuid
 from typing import Any
 from pydantic import BaseModel, Field
 
@@ -61,7 +60,7 @@ class StubSMSSender:
         self._sms_from = from_label
         self._callback_url = callback_url
 
-    def send_sms(self, mobile: str, message: str, idempotency_key: str) -> SendStatus:
+    async def send_sms(self, mobile: str, message: str, idempotency_key: str) -> SendStatus:
 
         short_message = StubMessageFormat(
             mobile=mobile, message=message

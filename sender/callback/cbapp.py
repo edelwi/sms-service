@@ -24,7 +24,7 @@ app = FastAPI(
     ],
     response_class=Response,
 )
-def receive_delivery_status_from_provider(
+async def receive_delivery_status_from_provider(
     status: megafon.DeliveryMessage,
     db: redis.Redis = Depends(get_redis_db),
 ):
@@ -35,7 +35,7 @@ def receive_delivery_status_from_provider(
         status=status.status,
         short_message=status.short_message,
     )
-    delivery_status.create(
+    await delivery_status.create(
         ttl_seconds=settings.REDIS_STORAGE_DELIVERY_STATUS_TTL_SECONDS
     )
     return Response(status_code=200)

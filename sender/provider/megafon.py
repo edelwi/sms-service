@@ -3,7 +3,8 @@ import logging
 import string
 from typing import Any
 from pydantic import BaseModel, Field, validator
-import requests
+# import requests
+import aiohttp
 
 from config import settings
 from sender.core import (
@@ -72,8 +73,10 @@ class MegafonSMSSender:
         self._api_client_password = api_client_password
         self._sms_from = from_label
         self._callback_url = callback_url
+        self.__auth = aiohttp.BasicAuth(self._api_client_login, self._api_client_password)
 
-    def send_sms(
+
+    async def send_sms(
         self,
         mobile: str,
         message: str,
@@ -91,27 +94,23 @@ class MegafonSMSSender:
             "msg_id": idempotency_key,
         }
         log.info(f"Send payload: {payload}")
+
         try:
-            r = requests.post(
-                self._api_url,
-                json=payload,
-                auth=requests.auth.HTTPBasicAuth(
-                    self._api_client_login, self._api_client_password
-                ),
-                stream=True,
-            )
-        except requests.exceptions.ConnectionError as e:
+            async with aiohttp.ClientSession(auth=self.__auth, ) as session:
+                async with session.post(url=self._api_url, json=payload) as response:
+                    text = await response.text()
+                    status_code = response.status
+                    if status_code == 200:
+                        ip = response.connection.transport.get_extra_info('peername', "0.0.0.0")
+                    else:
+                        error_message = f"SMS API Server cannot complete the request. Code: {status_code} {text}"
+                        log.error(error_message)
+                        raise ProviderResponseError(error_message)
+        except aiohttp.ClientConnectorError as e:
             error_message = f"SMS API Server is not accessible. {e}"
             log.error(error_message)
             raise ProviderConnectionError(error_message)
-        try:
-            (ip, port) = r.raw._connection.sock.getpeername()
-        except AttributeError:
-            ip = "0.0.0.0"
-        if r.status_code != 200:
-            error_message = f"SMS API Server cannot complete the request. Code: {r.status_code} {r.text}"
-            log.error(error_message)
-            raise ProviderResponseError(error_message)
+
         return MegafonSendStatus(
-            response_text=r.text, status_code=r.status_code, ipaddress=ip
+            response_text=text, status_code=status_code, ipaddress=ip
         )

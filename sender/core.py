@@ -9,7 +9,7 @@ class SendStatus(Protocol):
 
 
 class SomeSMSSender(Protocol):
-    def send_sms(
+    async def send_sms(
         self,
         mobile: str,
         message: str,
@@ -23,9 +23,9 @@ class SMSSenderCreator(ABC):
     def factory_method(self) -> SomeSMSSender:
         pass
 
-    def send_sms(self, mobile: str, message: str, idempotency_key: str) -> SendStatus:
+    async def send_sms(self, mobile: str, message: str, idempotency_key: str) -> SendStatus:
         sender_obj = self.factory_method()
-        return sender_obj.send_sms(mobile=mobile, message=message, idempotency_key=idempotency_key)
+        return await sender_obj.send_sms(mobile=mobile, message=message, idempotency_key=idempotency_key)
 
 
 class ProviderError(Exception):
