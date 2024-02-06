@@ -10,7 +10,7 @@ click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.2.0
 cryptography==41.0.6
-fastapi==0.96.0
+fastapi==0.109.1
 grpcio==1.54.2
 hiredis==2.2.3
 idna==3.4
