@@ -17,7 +17,7 @@ pptree==3.1
 prompt-toolkit==3.0.38
 protobuf==4.23.2
 pycparser==2.21
-pydantic==1.10.8
+pydantic==1.10.13
 python-dotenv==1.0.0
 python-ulid==1.1.0
 pytz==2023.3
