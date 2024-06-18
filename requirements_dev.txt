@@ -15,7 +15,7 @@ grpcio==1.54.3
 grpcio-tools==1.54.2
 h11==0.14.0
 hiredis==2.2.3
-idna==3.4
+idna==3.7
 kombu==5.3.0
 more-itertools==8.14.0
 netaddr==0.8.0
