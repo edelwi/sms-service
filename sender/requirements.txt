@@ -23,7 +23,7 @@ python-ulid==1.1.0
 pytz==2023.3
 redis==4.5.5
 redis-om==0.1.2
-requests==2.31.0
+requests==2.32.2
 six==1.16.0
 types-pyOpenSSL==23.2.0.0
 types-redis==4.5.5.2
